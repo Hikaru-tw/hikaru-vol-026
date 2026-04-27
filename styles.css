@@ -260,6 +260,9 @@ body::after {
 .loader__line {
   display: block;
   overflow: hidden;
+  /* Same descender-safe trick as .hero__title .line. */
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
 }
 .loader__line em {
   display: inline-block;
@@ -409,6 +412,9 @@ body:not(.is-loading) .loader {
   display: flex;
   align-items: flex-end;
   position: relative;
+  /* Clip the off-canvas watermark so it can't create horizontal scroll
+     on mobile when the smooth-scroll fallback is active. */
+  overflow: hidden;
 }
 .hero__grid {
   width: 100%;
@@ -465,6 +471,11 @@ body:not(.is-loading) .loader {
 .hero__title .line {
   display: block;
   overflow: hidden;
+  /* Give the clipping box room for descenders (g, y) — without this,
+     overflow:hidden chops the bottom of the glyph. The negative margin
+     keeps the original visual line spacing intact. */
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
 }
 .hero__title .word {
   display: inline-block;
@@ -628,8 +639,19 @@ body:not(.is-loading) .loader {
 }
 
 @media (max-width: 1100px) {
+  /* Keep the watermark visible on tablets/phones, just scaled down
+     and pushed further off-canvas so it reads as background, not
+     content. */
   .hero__watermark {
-    display: none;
+    font-size: clamp(320px, 95vw, 620px);
+    right: -22vw;
+  }
+}
+@media (max-width: 560px) {
+  .hero__watermark {
+    font-size: clamp(280px, 110vw, 520px);
+    right: -28vw;
+    opacity: 0.85; /* a touch softer on tiny screens */
   }
 }
 
@@ -750,13 +772,44 @@ body:not(.is-loading) .loader {
   }
 }
 
-/* Collapse the hero's 2-column row on tablets/phones — drop the aside */
+/* Collapse the hero's 2-column row on tablets/phones — the aside
+   is moved above the title as a centered "stamp", giving the seal
+   its own breathing room instead of competing with the title. */
 @media (max-width: 1100px) {
+  .hero {
+    padding-top: 96px;
+  }
   .hero__main {
     grid-template-columns: 1fr;
   }
   .hero__aside {
+    order: -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(220px, 48vw, 360px);
+    height: clamp(220px, 48vw, 360px);
+    margin: 0 auto 48px;
+    align-self: center;
+  }
+  .hero__aside .hero__quote {
     display: none;
+  }
+  .seal {
+    width: 100%;
+    height: 100%;
+    flex: none;
+    align-self: center;
+  }
+}
+@media (max-width: 560px) {
+  .hero {
+    padding-top: 72px;
+  }
+  .hero__aside {
+    width: clamp(200px, 62vw, 300px);
+    height: clamp(200px, 62vw, 300px);
+    margin-bottom: 36px;
   }
 }
 
